@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <meta name="viewport" content="initial-scale=0.1"> -->
+    <title>Intelligent Email Assitant</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+      <script defer src="https://use.fontawesome.com/releases/v5.6.3/js/all.js" integrity="sha384-EIHISlAOj4zgYieurP0SdoiBYfGJKkgWedPHH4jCzpCXLmzVsw1ouK59MuUtP4a1" crossorigin="anonymous"></script>
+       
+<script src="https://code.highcharts.com/highcharts.js"></script>
+    
+    
+
+    </head>
+<style>
+    .overlay-div {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 99;
+    cursor: pointer;
+}
+    .overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 50px;
+    color: white;
+    user-select: none;
+    transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+}
+span#result-text{
+    font-size:30px;
+}
+    span#result-predicted {
+            font-size: 30px;
+    background-color: yellow;
+}
+
+</style>
+<body>
+<div class="overlay-div" ><span class="overlay-text">Loading ...</span> </div>
+    <div class="wrapper">
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                 <a class="navbar-brand" href="#">Intelligent Email Assitant</a>
+                  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                      <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                      </li>
+                     
+                      </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+    </div>
+    {% block content %}
+    {% endblock %}
+
+</body>
+<footer>
+    
+    
+</footer>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+<script>
+
+jQuery("#phrase").on("input",function(){
+    var val = jQuery(this).val();
+    var words = val.split(" ");
+    if(words.length == 4){
+        jQuery(".overlay-div").show();
+        jQuery.ajax('/posts/'+val.trim()+"/",{
+            type:'get',
+            success:function(data,status){
+                var jobject = JSON.parse(data);
+
+                var series = [];
+                console.log(jobject);
+                var bestpredict = "";
+                var pivot = 0;
+                for (var key in jobject){
+                    if(jobject.hasOwnProperty(key)){
+                        if(jobject[key] > pivot){
+                            bestpredict = key;
+                            pivot = jobject[key];
+                        }
+                        series.push([key,jobject[key]]);
+                        //console.log(key+" "+jobject[key])
+                    }
+                }
+
+                console.log(series);
+                showChart(series);
+                jQuery("#result-text").text(val.trim());
+                jQuery("#result-predicted").text(bestpredict);
+                jQuery("#phrase").val("");
+                jQuery(".overlay-div").hide();
+
+            }
+        })
+    }
+    console.log(words);
+})
+
+function showChart(data){
+
+Highcharts.chart('charthere', {
+    chart: {
+        type: 'bar'
+    },
+    title: {
+        text: 'Next word in the phrase'
+    },
+    subtitle: {
+        text: 'Source: n-gram model'
+    },
+    xAxis: {
+        type: 'category',
+        labels: {
+            rotation: -45,
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Word (percentage)'
+        }
+    },
+    legend: {
+        enabled: false
+    },
+    tooltip: {
+        pointFormat: 'Next Word: <b>{point.y:.1f}%</b>'
+    },
+    series: [{
+        name: 'Population',
+        data:data,
+        dataLabels: {
+            enabled: false,
+            rotation: -90,
+            color: '#FFFFFF',
+            align: 'right',
+            format: '{point.y:.1f}', // one decimal
+            y: 10, // 10 pixels down from the top
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }
+    }]
+});
+}
+
+</script>
+</html>

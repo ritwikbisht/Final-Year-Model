@@ -1,0 +1,42 @@
+
+{% extends 'header.html' %}
+{% block content %}
+
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="display-3">Generalized Model</h1>
+            <p>This assitant will show the most frequent words used by various user</p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="col-4" style="float:left;    z-index: 90;">
+            <div class="row">
+
+                <form>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="phrase">Please enter a phase of 3-4 words</label>
+                        <input type="text" class="form-control" id="phrase" aria-describedby="phraseHelp" placeholder="Enter Phrase">
+                        <small id="phraseHelp" class="form-text text-muted">It might take a second or less.</small>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 20px">
+                        <label for="result"><span id="result-text"></span> <span id="result-predicted"></span></label>
+
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        <div class="col-8">
+            <div class="row">
+
+                <div id="charthere" style="min-width:700px; height: 600px; margin: 0 auto"></div>
+
+            </div>
+        </div>
+    </div>
+ <script>
+
+    </script>
+{% endblock %}
